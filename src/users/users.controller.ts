@@ -14,15 +14,17 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { ValidationPipe } from '../validation.pipe';
+import { UserInfo } from './interface/user-login-interface';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Post()
-  // async createUser(@Body() dto: CreateUserDto): Promise<void> {
-  //   console.log(dto);
-  // }
+  @Post()
+  async createUser(@Body() dto: CreateUserDto): Promise<void> {
+    this.usersService.create(dto);
+    console.log(dto);
+  }
 
   @Post('/email-verify')
   async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
@@ -36,12 +38,12 @@ export class UsersController {
     return;
   }
 
-  // @Get('/:id')
-  // async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
-  //   console.log(userId);
-  //   console.log(process.env.DATABASE_HOST);
-  //   return;
-  // }
+  @Get('/:id')
+  async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
+    console.log(userId);
+    console.log(process.env.DATABASE_HOST);
+    return;
+  }
 
   // @Get(':id')
   // findOne(
