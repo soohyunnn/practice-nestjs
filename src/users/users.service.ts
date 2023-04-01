@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ulid } from 'ulid';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
+    private dataSource: DataSource,
   ) {}
 
   private async saveUser(
@@ -40,6 +41,56 @@ export class UsersService {
       where: { email: emailAddress },
     });
     return user != undefined;
+  }
+
+  private async saveUserUsingQueryRunner(
+    name: string,
+    email: string,
+    password: string,
+    signupVerifyToken: string,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const user = new UserEntity();
+      user.id = ulid();
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.signupVerifyToken = signupVerifyToken;
+
+      await queryRunner.manager.save(user);
+      //throw new InternalServerErrorException();  //일부러 에러를 발생시켜본다.
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      //에러가 발생하면 롤백
+      await queryRunner.rollbackTransaction();
+    } finally {
+      //직접 생성한 QueryRunner는 해제시켜주어야 함
+      await queryRunner.release();
+    }
+  }
+
+  private async saveUserUsingTransaction(
+    name: string,
+    email: string,
+    password: string,
+    signupVerifyToken: string,
+  ) {
+    await this.dataSource.transaction(async (manager) => {
+      const user = new UserEntity();
+      user.id = ulid();
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.signupVerifyToken = signupVerifyToken;
+
+      await manager.save(user);
+    });
   }
 
   create(createUserDto: CreateUserDto) {

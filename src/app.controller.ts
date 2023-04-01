@@ -1,7 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CommonService } from './common/common.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from './auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller()
 export class AppController {
   constructor(
@@ -10,6 +12,7 @@ export class AppController {
   ) {}
   // constructor(private readonly configService: ConfigService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
   getHello(): string {
     return process.env.DATABASE_HOST;
