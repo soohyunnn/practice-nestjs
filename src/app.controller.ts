@@ -28,4 +28,9 @@ export class AppController {
     console.log(this.configService.get('DATABASE_HOST'));
     return this.commonService.hello();
   }
+
+  @Get('/error')
+  error(foo: any): string {
+    return foo.ber();
+  }
 }

@@ -14,7 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleware } from './logger/logger.middleware';
 import { Logger2Middleware } from './logger/logger2.middleware';
 import { UsersController } from './users/users.controller';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth/auth.service';
 import { UserEntity } from './entities/user.entity';
@@ -31,6 +31,8 @@ import {
 } from 'nest-winston';
 import * as process from 'process';
 import * as winston from 'winston';
+import { HttpExceptionFilter } from './http.exception.filter';
+import { ExceptionModule } from './exception/exception.module';
 
 @Module({
   providers: [
@@ -40,6 +42,10 @@ import * as winston from 'winston';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
+    // },
     // {
     //   provide: APP_GUARD,
     //   useClass: HandlerRolesGuard,
@@ -88,6 +94,7 @@ import * as winston from 'winston';
         }),
       ],
     }),
+    ExceptionModule,
   ],
   controllers: [AppController],
 })

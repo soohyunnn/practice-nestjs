@@ -11,6 +11,7 @@ import {
   utilities as nestWinstonModuleUtilities,
 } from 'nest-winston';
 import * as winston from 'winston';
+import { HttpExceptionFilter } from './http.exception.filter';
 
 dotenv.config({
   path: path.resolve(
@@ -47,6 +48,7 @@ async function bootstrap() {
       ],
     }),
   });
+  // app.useGlobalFilters(new HttpExceptionFilter()); //전역 필터 적용
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
