@@ -1,10 +1,16 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { ulid } from 'ulid';
+import { AuthService } from '../auth/auth.service';
+import {UserInfo} from "./interface/user-login-interface";
 
 @Injectable()
 export class UsersService {
@@ -12,6 +18,7 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
     private dataSource: DataSource,
+    private authService: AuthService,
   ) {}
 
   private async saveUser(
@@ -41,6 +48,38 @@ export class UsersService {
       where: { email: emailAddress },
     });
     return user != undefined;
+  }
+
+  async verifyEmail(signupVerifyToken: string): Promise<string> {
+    const user = await this.usersRepository.findOne({
+      where: { signupVerifyToken },
+    });
+
+    if (!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    return this.authService.login({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
+  }
+
+  async login(email: string, password: string): Promise<string> {
+    const user = await this.usersRepository.findOne({
+      where: {email, password}
+    });
+
+    if(!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    return this.authService.login({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    })
   }
 
   private async saveUserUsingQueryRunner(
@@ -91,6 +130,22 @@ export class UsersService {
 
       await manager.save(user);
     });
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo> {
+    const user = await this.usersRepository.findOne({
+      where: {id: userId}
+    });
+
+    if(!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    }
   }
 
   create(createUserDto: CreateUserDto) {

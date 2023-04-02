@@ -2,12 +2,11 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
-  Get,
-  HttpStatus,
+  Get, Headers,
   Param,
   ParseIntPipe,
   Post,
-  Query,
+  Query, SetMetadata, UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,10 +14,27 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { ValidationPipe } from '../validation.pipe';
 import { UserInfo } from './interface/user-login-interface';
+import {AuthService} from "../auth/auth.service";
+import {AuthGuard} from "../auth.guard";
+import {UserData} from "../utils/decorators/UserData";
+import {Roles} from 'src/utils/decorators/roles.decorator';
 
+@Roles('admin')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, private authService: AuthService) {}
+
+  @Get('/username')
+  getHello2(@UserData('name') name: string) {
+    console.log(name);
+  }
+
+
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  async getUserInfo(@Headers() headers: any, @Param('id') userId: string): Promise<UserInfo> {
+    return this.usersService.getUserInfo(userId);
+  }
 
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
@@ -35,15 +51,16 @@ export class UsersController {
   @Post('/login')
   async login(@Body() dto: UserLoginDto): Promise<string> {
     console.log(dto);
-    return;
+    const token = await this.usersService.login(dto.email, dto.password)
+    return token;
   }
 
-  @Get('/:id')
-  async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
-    console.log(userId);
-    console.log(process.env.DATABASE_HOST);
-    return;
-  }
+  // @Get('/:id')
+  // async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
+  //   console.log(userId);
+  //   console.log(process.env.DATABASE_HOST);
+  //   return;
+  // }
 
   // @Get(':id')
   // findOne(
@@ -72,6 +89,7 @@ export class UsersController {
   }
 
   @Post()
+  @Roles('admin')
   create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }

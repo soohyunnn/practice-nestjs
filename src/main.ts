@@ -18,8 +18,7 @@ dotenv.config({
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(logger3);
-  app.useGlobalGuards(new AuthGuard());
+  // app.use(logger3);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
