@@ -2,11 +2,18 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
-  Get, Headers,
+  Get,
+  Headers,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+  LoggerService,
   Param,
   ParseIntPipe,
   Post,
-  Query, SetMetadata, UseGuards,
+  Query,
+  SetMetadata,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,32 +21,57 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { ValidationPipe } from '../validation.pipe';
 import { UserInfo } from './interface/user-login-interface';
-import {AuthService} from "../auth/auth.service";
-import {AuthGuard} from "../auth.guard";
-import {UserData} from "../utils/decorators/UserData";
-import {Roles} from 'src/utils/decorators/roles.decorator';
+import { AuthService } from '../auth/auth.service';
+import { AuthGuard } from '../auth.guard';
+import { UserData } from '../utils/decorators/UserData';
+import { Roles } from 'src/utils/decorators/roles.decorator';
+import { Logger as WinstonLogger } from 'winston';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Roles('admin')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService, private authService: AuthService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private authService: AuthService,
+    // @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+
+    // @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: LoggerService,
+  ) {}
 
   @Get('/username')
   getHello2(@UserData('name') name: string) {
     console.log(name);
   }
 
-
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getUserInfo(@Headers() headers: any, @Param('id') userId: string): Promise<UserInfo> {
+  async getUserInfo(
+    @Headers() headers: any,
+    @Param('id') userId: string,
+  ): Promise<UserInfo> {
     return this.usersService.getUserInfo(userId);
   }
 
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
     this.usersService.create(dto);
+    this.printWinstonLog(dto);
     console.log(dto);
+  }
+
+  private printWinstonLog(dto) {
+    try {
+      throw new InternalServerErrorException('test');
+    } catch (e) {
+      this.logger.error('error: ' + JSON.stringify(dto), e.stack);
+    }
+
+    this.logger.warn('warn: ', JSON.stringify(dto));
+    this.logger.log('log: ', JSON.stringify(dto));
+    this.logger.verbose('verbose: ', JSON.stringify(dto));
+    this.logger.debug('debug: ', JSON.stringify(dto));
   }
 
   @Post('/email-verify')
@@ -51,7 +83,7 @@ export class UsersController {
   @Post('/login')
   async login(@Body() dto: UserLoginDto): Promise<string> {
     console.log(dto);
-    const token = await this.usersService.login(dto.email, dto.password)
+    const token = await this.usersService.login(dto.email, dto.password);
     return token;
   }
 

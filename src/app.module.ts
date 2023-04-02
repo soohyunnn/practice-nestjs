@@ -23,9 +23,18 @@ import authConfig from './config/authConfig';
 import { HandlerRolesGuard } from './handler.roles.guard';
 import { ClassRolesGuard } from './class.roles.guard';
 import { RolesGuard } from './roles.guard';
+import { AppService } from './app.service';
+import { LoggerModule } from './logger/logger.module';
+import {
+  WinstonModule,
+  utilities as nestWinstonModuleUtilities,
+} from 'nest-winston';
+import * as process from 'process';
+import * as winston from 'winston';
 
 @Module({
   providers: [
+    AppService,
     ConfigService,
     {
       provide: APP_GUARD,
@@ -65,8 +74,22 @@ import { RolesGuard } from './roles.guard';
       migrationsTableName: 'migrations',
     }),
     CommonModule,
+    LoggerModule,
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            nestWinstonModuleUtilities.format.nestLike('MyApp', {
+              prettyPrint: true,
+            }),
+          ),
+        }),
+      ],
+    }),
   ],
-  controllers: [],
+  controllers: [AppController],
 })
 export class AppModule {}
 
