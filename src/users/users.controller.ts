@@ -29,6 +29,9 @@ import { Roles } from 'src/utils/decorators/roles.decorator';
 import { Logger as WinstonLogger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ErrorsInterceptor } from '../error.interceptor';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from './command/create-user.command';
+import { GetUserInfoQuery } from './application/query/get-user-info.query';
 
 @Roles('admin')
 @Controller('users')
@@ -40,6 +43,8 @@ export class UsersController {
 
     // @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: LoggerService,
     @Inject(Logger) private readonly logger: LoggerService,
+    private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Get('/username')
@@ -53,14 +58,16 @@ export class UsersController {
     @Headers() headers: any,
     @Param('id') userId: string,
   ): Promise<UserInfo> {
-    return this.usersService.getUserInfo(userId);
+    const getUserInfoQuery = new GetUserInfoQuery(userId);
+    return this.queryBus.execute(getUserInfoQuery);
+    // return this.usersService.getUserInfo(userId);
   }
 
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
-    this.usersService.create(dto);
-    this.printWinstonLog(dto);
-    console.log(dto);
+    const { name, email, password } = dto;
+    const command = new CreateUserCommand(name, email, password);
+    return this.commandBus.execute(command);
   }
 
   private printWinstonLog(dto) {
