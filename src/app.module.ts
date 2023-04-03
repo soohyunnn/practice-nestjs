@@ -33,6 +33,7 @@ import * as process from 'process';
 import * as winston from 'winston';
 import { HttpExceptionFilter } from './http.exception.filter';
 import { ExceptionModule } from './exception/exception.module';
+import { LoggingModule } from './logging/logger.module';
 
 @Module({
   providers: [
@@ -95,6 +96,7 @@ import { ExceptionModule } from './exception/exception.module';
       ],
     }),
     ExceptionModule,
+    LoggingModule,
   ],
   controllers: [AppController],
 })

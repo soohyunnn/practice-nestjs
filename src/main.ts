@@ -12,6 +12,8 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import { HttpExceptionFilter } from './http.exception.filter';
+import { LoggingInterceptor } from './logging.interceptor';
+import { TransformInterceptor } from './transform.interceptor';
 
 dotenv.config({
   path: path.resolve(
@@ -49,6 +51,10 @@ async function bootstrap() {
     }),
   });
   // app.useGlobalFilters(new HttpExceptionFilter()); //전역 필터 적용
+  app.useGlobalInterceptors(
+    // new LoggingInterceptor(),
+    new TransformInterceptor(),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

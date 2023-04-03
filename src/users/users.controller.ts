@@ -14,6 +14,7 @@ import {
   Query,
   SetMetadata,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,6 +28,7 @@ import { UserData } from '../utils/decorators/UserData';
 import { Roles } from 'src/utils/decorators/roles.decorator';
 import { Logger as WinstonLogger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { ErrorsInterceptor } from '../error.interceptor';
 
 @Roles('admin')
 @Controller('users')
@@ -105,8 +107,10 @@ export class UsersController {
   //   return this.usersService.findOne(id);
   // }
 
+  @UseInterceptors(ErrorsInterceptor)
   @Get(':id')
   findOne(@Param('id', ValidationPipe) id: number) {
+    throw new InternalServerErrorException();
     return this.usersService.findOne(id);
   }
 
