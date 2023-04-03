@@ -34,6 +34,12 @@ import * as winston from 'winston';
 import { HttpExceptionFilter } from './http.exception.filter';
 import { ExceptionModule } from './exception/exception.module';
 import { LoggingModule } from './logging/logger.module';
+import { BatchService } from './batch/batch.service';
+import { BatchModule } from './batch/batch.module';
+import { HealthCheckController } from './health-check/health-check.controller';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
+import { DogHealthIndicator } from './health-check/dog.health';
 
 @Module({
   providers: [
@@ -56,6 +62,9 @@ import { LoggingModule } from './logging/logger.module';
     //   useClass: ClassRolesGuard,
     // },
     AuthService,
+    BatchService,
+    HealthCheckController,
+    DogHealthIndicator,
   ],
   imports: [
     UsersModule,
@@ -97,8 +106,11 @@ import { LoggingModule } from './logging/logger.module';
     }),
     ExceptionModule,
     LoggingModule,
+    BatchModule,
+    TerminusModule,
+    HttpModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthCheckController],
 })
 export class AppModule {}
 
