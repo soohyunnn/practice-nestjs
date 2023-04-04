@@ -1,9 +1,9 @@
 import { IQueryHandler } from '@nestjs/cqrs';
 import { GetUserInfoQuery } from './get-user-info.query';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../../../entities/user.entity';
+import { UserEntity } from '../../infra/db/entity/user.entity';
 import { Repository } from 'typeorm';
-import { UserInfo } from '../../interface/user-login-interface';
+import { UserInfo } from '../../interface/UserInfo';
 import { NotFoundException } from '@nestjs/common';
 
 export class GetUserInfoQueryHandler

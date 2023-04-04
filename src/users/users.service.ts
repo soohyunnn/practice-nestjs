@@ -3,14 +3,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './interface/dto/create-user.dto';
+import { UpdateUserDto } from './interface/dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from './infra/db/entity/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { ulid } from 'ulid';
 import { AuthService } from '../auth/auth.service';
-import {UserInfo} from "./interface/user-login-interface";
+import { UserInfo } from './interface/UserInfo';
 
 @Injectable()
 export class UsersService {
@@ -68,10 +68,10 @@ export class UsersService {
 
   async login(email: string, password: string): Promise<string> {
     const user = await this.usersRepository.findOne({
-      where: {email, password}
+      where: { email, password },
     });
 
-    if(!user) {
+    if (!user) {
       throw new NotFoundException('유저가 존재하지 않습니다.');
     }
 
@@ -79,7 +79,7 @@ export class UsersService {
       id: user.id,
       name: user.name,
       email: user.email,
-    })
+    });
   }
 
   private async saveUserUsingQueryRunner(
@@ -134,18 +134,18 @@ export class UsersService {
 
   async getUserInfo(userId: string): Promise<UserInfo> {
     const user = await this.usersRepository.findOne({
-      where: {id: userId}
+      where: { id: userId },
     });
 
-    if(!user) {
+    if (!user) {
       throw new NotFoundException('유저가 존재하지 않습니다.');
     }
 
     return {
       id: user.id,
       name: user.name,
-      email: user.email
-    }
+      email: user.email,
+    };
   }
 
   create(createUserDto: CreateUserDto) {

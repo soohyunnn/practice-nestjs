@@ -16,22 +16,22 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from '../users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserLoginDto } from './dto/user-login.dto';
-import { ValidationPipe } from '../validation.pipe';
-import { UserInfo } from './interface/user-login-interface';
-import { AuthService } from '../auth/auth.service';
-import { AuthGuard } from '../auth.guard';
-import { UserData } from '../utils/decorators/UserData';
+import { ValidationPipe } from '../../validation.pipe';
+import { UserInfo } from './UserInfo';
+import { AuthService } from '../../auth/auth.service';
+import { AuthGuard } from '../../auth.guard';
+import { UserData } from '../../utils/decorators/UserData';
 import { Roles } from 'src/utils/decorators/roles.decorator';
 import { Logger as WinstonLogger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { ErrorsInterceptor } from '../error.interceptor';
+import { ErrorsInterceptor } from '../../error.interceptor';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateUserCommand } from './command/create-user.command';
-import { GetUserInfoQuery } from './application/query/get-user-info.query';
+import { CreateUserCommand } from '../application/command/create-user.command';
+import { GetUserInfoQuery } from '../application/query/get-user-info.query';
 
 @Roles('admin')
 @Controller('users')

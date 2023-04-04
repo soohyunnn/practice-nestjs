@@ -6,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { NotIn } from '../../not-in';
+import { NotIn } from '../../../not-in';
 
 export class CreateUserDto {
   @Transform((params) => params.value.trim())
