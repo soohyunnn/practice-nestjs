@@ -33,8 +33,8 @@ describe('UserFactory', () => {
         'user-id',
         'YOUR_NAME',
         'YOUR_EMAIL@gmail.com',
-        'signup-verify-token',
         'pass1234',
+        'signup-verify-token',
       );
       //Then  //3.
       const expected = new User(
