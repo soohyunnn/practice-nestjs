@@ -12,7 +12,6 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  SetMetadata,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,8 +25,6 @@ import { AuthService } from '../../auth/auth.service';
 import { AuthGuard } from '../../auth.guard';
 import { UserData } from '../../utils/decorators/UserData';
 import { Roles } from 'src/utils/decorators/roles.decorator';
-import { Logger as WinstonLogger } from 'winston';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ErrorsInterceptor } from '../../error.interceptor';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/command/create-user.command';
